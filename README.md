@@ -9,7 +9,9 @@ Projeto da disciplina de Desenvolvimento Front-End.
 ## Como abrir
 
 O JavaScript usa módulos ES (`import`/`export`), que o navegador não carrega direto do disco (`file://`).
-Abra com um servidor local, por exemplo a extensão **Live Server** do VS Code, clicando com o botão direito em `html/index.html` > *Open with Live Server*.
+Versão online: https://lucleolima.github.io/ong-maos-que-ajudam-js/
+
+Para rodar no computador, abra com um servidor local, por exemplo a extensão **Live Server** do VS Code, clicando com o botão direito em `html/index.html` > *Open with Live Server*.
 
 O `index.html` da raiz só redireciona para `html/index.html` (útil no GitHub Pages).
 
@@ -21,7 +23,7 @@ O `index.html` da raiz só redireciona para `html/index.html` (útil no GitHub P
 | Templates: páginas e componentes gerados por funções a partir dos dados em `js/dados/conteudo.js` | `js/templates/` |
 | Filtro de projetos por área (botões com `aria-pressed`) e busca por texto sem diferenciar acentos | `js/modulos/projetos.js` |
 | Validação do cadastro campo a campo (CPF com dígitos verificadores, idade mínima, telefone, CEP...), resumo de erros com links para os campos | `js/modulos/validacao.js`, `js/modulos/formulario.js` |
-| Endereço preenchido automaticamente pelo CEP (API ViaCEP) | `js/modulos/formulario.js` |
+| Endereço preenchido automaticamente pelo CEP (API ViaCEP) | `js/modulos/cep.js`, `js/modulos/formulario.js` |
 | localStorage: inscrições salvas, rascunho automático do formulário e último filtro escolhido | `js/modulos/armazenamento.js`, `js/modulos/cadastros.js` |
 | Página de inscrições com filtro por tipo e remoção confirmada em modal (`<dialog>`) | `js/modulos/inscricoes.js` |
 | Biblioteca externa **IMask** (máscaras de CPF, telefone e CEP), com máscaras próprias de reserva se a CDN falhar | `js/modulos/mascaras.js` |
@@ -52,6 +54,7 @@ O `index.html` da raiz só redireciona para `html/index.html` (útil no GitHub P
 │       ├── mascaras.js        IMask + máscaras de reserva
 │       ├── armazenamento.js   acesso seguro ao localStorage
 │       ├── cadastros.js       inscrições e rascunho
+│       ├── cep.js             consulta à API ViaCEP (só rede, sem DOM)
 │       ├── formulario.js      eventos do cadastro
 │       ├── projetos.js        filtro e busca de projetos
 │       └── inscricoes.js      lista de inscrições
@@ -67,6 +70,6 @@ Com o Node.js instalado (versão 20 ou superior):
 npm test
 ```
 
-São 16 testes das partes que não dependem da tela: validação (CPF, nome, e-mail, telefone, CEP, idade), armazenamento (incluindo JSON corrompido e localStorage bloqueado), cadastros, escape de HTML contra XSS, máscaras, filtro de projetos e leitura das rotas.
+São 17 testes das partes que não dependem da tela: validação (CPF, nome, e-mail, telefone, CEP, idade), armazenamento (incluindo JSON corrompido e localStorage bloqueado), cadastros, consulta de CEP (com um fetch falso, sem internet), escape de HTML contra XSS, máscaras, filtro de projetos e leitura das rotas.
 
 As telas também foram testadas manualmente no navegador (envio vazio, CPF inválido e repetido, busca de CEP, rascunho após trocar de página, remoção de inscrições) e o HTML gerado de cada página passou no validador do W3C sem erros.

@@ -7,6 +7,7 @@ import {
 } from './validacao.js';
 import { cadastros } from './cadastros.js';
 import { aplicarMascaras } from './mascaras.js';
+import { buscarEnderecoPorCep } from './cep.js';
 import { mostrarToast, mostrarSucessoCadastro } from './feedback.js';
 
 // Uma regra por campo. Cada regra recebe o valor e devolve '' ou a mensagem de erro.
@@ -149,14 +150,12 @@ export function montarCadastro(raiz, projetoEscolhido) {
     dicaCep.textContent = 'Buscando endereço...';
 
     try {
-      const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: AbortSignal.timeout(5000) });
-      const endereco = await resposta.json();
-      if (endereco.erro) {
+      const endereco = await buscarEnderecoPorCep(cep);
+      if (!endereco) {
         dicaCep.textContent = 'CEP não encontrado. Preencha o endereço manualmente.';
         return;
       }
-      const preencher = { logradouro: endereco.logradouro, cidade: endereco.localidade, estado: endereco.uf };
-      Object.entries(preencher).forEach(([nome, valor]) => {
+      Object.entries(endereco).forEach(([nome, valor]) => {
         if (valor) {
           formulario.elements[nome].value = valor;
           if (camposTocados.has(nome)) validarCampo(nome);
@@ -260,9 +259,16 @@ export function montarCadastro(raiz, projetoEscolhido) {
   const mascaras = aplicarMascaras(formulario); // depois do rascunho, para formatar os valores restaurados
   if (recuperouRascunho) mostrarToast('Rascunho recuperado: continue de onde parou.');
 
-  // Ao sair da página, grava o que ainda estava esperando o debounce
-  return () => {
+  // Fechar ou recarregar a aba dentro dos 400 ms do debounce perderia as últimas letras
+  function gravarPendente() {
     if (temporizadorRascunho) gravarRascunhoAgora();
+  }
+  window.addEventListener('pagehide', gravarPendente);
+
+  // Ao sair da página pela SPA, também grava o que ainda estava esperando o debounce
+  return () => {
+    gravarPendente();
+    window.removeEventListener('pagehide', gravarPendente);
     mascaras.destruir();
   };
 }

@@ -89,3 +89,15 @@ test('Roteador: interpreta o hash em rota e parâmetro', () => {
   assert.deepEqual(lerRota('#/', 'inicio'), { nome: 'inicio', parametro: null });
   assert.deepEqual(lerRota('#conteudo', 'inicio'), { nome: 'inicio', parametro: null });
 });
+
+test('CEP: converte a resposta do ViaCEP e trata CEP inexistente (fetch falso, sem internet)', async () => {
+  const { buscarEnderecoPorCep } = await import('../js/modulos/cep.js');
+  const fetchFalso = (resposta) => async () => ({ ok: true, json: async () => resposta });
+
+  assert.deepEqual(
+    await buscarEnderecoPorCep('01001000', fetchFalso({ logradouro: 'Praça da Sé', localidade: 'São Paulo', uf: 'SP' })),
+    { logradouro: 'Praça da Sé', cidade: 'São Paulo', estado: 'SP' }
+  );
+  assert.equal(await buscarEnderecoPorCep('99999999', fetchFalso({ erro: true })), null);
+  await assert.rejects(buscarEnderecoPorCep('01001000', async () => ({ ok: false, status: 500 })));
+});
